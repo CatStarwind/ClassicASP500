@@ -1,2 +1,3 @@
 # ClassicASP500
-Classic ASP 500 Error Reporting
+
+A simple page in VBScript for Classic ASP 500 error reporting.
