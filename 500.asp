@@ -69,9 +69,7 @@
 	debugInfo = debugInfo & "<tr> <th colspan='2' style='text-align:center;background-color:gold;padding:2px;'>Debug Information</th> </tr>"	
 	debugInfo = debugInfo & "<tr> <th>User</th>		<td>"& Request.serverVariables("AUTH_USER") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Time</th>		<td>"& Now() &"</td> </tr>"		
-	debugInfo = debugInfo & "<tr> <th>Page</th>		<td>"& Request.ServerVariables("SCRIPT_NAME") &"</td> </tr>"
-	debugInfo = debugInfo & "<tr> <th>File</th>		<td>"& Session("Tablelist-tablelabel") & " ("& Session("thefile") & ")</td> </tr>"
-	debugInfo = debugInfo & "<tr> <th>Report</th>	<td>"& Session("rname") & " ("& Session("seq_no") & ")</td> </tr>"
+	debugInfo = debugInfo & "<tr> <th>Page</th>		<td>"& Request.ServerVariables("SCRIPT_NAME") &"</td> </tr>"	
 	debugInfo = debugInfo & "<tr> <th>User IP</th>	<td>"& Request.ServerVariables("REMOTE_HOST") & " (" & Request.ServerVariables("REMOTE_ADDR") &")</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Browser</th>	<td>"& Request.ServerVariables("HTTP_USER_AGENT") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Server</th>	<td>"& Request.ServerVariables("SERVER_NAME") & " (" & Request.ServerVariables("LOCAL_ADDR") &")</td> </tr>"
@@ -106,7 +104,7 @@
 
 		oMessage.To = "ITGuy@webapp.com"
 		oMessage.From = "webapp@webapp.com"
-		oMessage.Subject = Application("Name") & " Error - " & objASPError.Category
+		oMessage.Subject = "WebApp Error - " & objASPError.Category
 		oMessage.htmlBody = style & errorDump		
 		oMessage.Send		
 	End If
@@ -114,7 +112,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title><%=Application("Name")%> Error</title>
+		<title>WebApp Error</title>
 		<% If tech Then Response.Write style%>
 	</head>
 	<body>
