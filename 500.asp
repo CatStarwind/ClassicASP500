@@ -15,13 +15,15 @@
 
 	'CSS
 	dim style : style = "<style type='text/css'>"
-	style = style & "table { width: 800px; } "	
+	style = style & "table { width: 800px;} "	
 	style = style & "#debugInfo th{ text-align:left; background-color:palegoldenrod; }"
 	style = style & "#debugInfo td{ background-color:lightgoldenrodyellow; }"
 	style = style & "#sessionInfo th{ text-align:left; background-color:cyan;}"
 	style = style & "#sessionInfo td{ background-color:lightcyan; }"
 	style = style & "#appInfo th{ text-align:left; background-color:tomato; }"
 	style = style & "#appInfo td{ background-color:pink; }"
+	style = style & "#serverInfo th{ text-align:left; background-color:limegreen;}"
+	style = style & "#serverInfo td{ background-color:palegreen; }"
 	style = style & "</style>"
 
 	' Error Message
@@ -37,12 +39,15 @@
 	Dim debugInfo : debugInfo = ""
 	debugInfo = debugInfo & "<table id='debugInfo'>"	
 	debugInfo = debugInfo & "<tr> <th colspan='2' style='text-align:center;background-color:gold;padding:2px;'>Debug Information</th> </tr>"	
-	debugInfo = debugInfo & "<tr> <th>User</th>		<td>"& Request.ServerVariables("AUTH_USER") &"</td> </tr>"
+	debugInfo = debugInfo & "<tr> <th>User</th>		<td>"& Request.serverVariables("AUTH_USER") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Time</th>		<td>"& Now() &"</td> </tr>"		
 	debugInfo = debugInfo & "<tr> <th>Page</th>		<td>"& Request.ServerVariables("SCRIPT_NAME") &"</td> </tr>"
+	debugInfo = debugInfo & "<tr> <th>File</th>		<td>"& Session("Tablelist-tablelabel") & " ("& Session("thefile") & ")</td> </tr>"
+	debugInfo = debugInfo & "<tr> <th>Report</th>	<td>"& Session("rname") & " ("& Session("seq_no") & ")</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>User IP</th>	<td>"& Request.ServerVariables("REMOTE_HOST") & " (" & Request.ServerVariables("REMOTE_ADDR") &")</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Browser</th>	<td>"& Request.ServerVariables("HTTP_USER_AGENT") &"</td> </tr>"
-	debugInfo = debugInfo & "<tr> <th>Server</th>	<td>"& Request.ServerVariables("SERVER_NAME") & " (" & Request.ServerVariables("LOCAL_ADDR") &")</td> </tr>"	
+	debugInfo = debugInfo & "<tr> <th>Server</th>	<td>"& Request.ServerVariables("SERVER_NAME") & " (" & Request.ServerVariables("LOCAL_ADDR") &")</td> </tr>"
+	debugInfo = debugInfo & "<tr> <th>Referer</th>	<td>"& Request.ServerVariables("HTTP_REFERER") & "</td> </tr>"	
 	debugInfo = debugInfo & "<tr> <th>POST</th>		<td>"& Request.Form &"</td> </tr>"
 	debugInfo = debugInfo & "</table>"	
 	
@@ -88,31 +93,55 @@
 	Next
 	appVarTable = appVarTable & "</table>"
 
+	'Server Variables
+	Dim serverVar, serverVarItem, serverTable
+	serverTable = "<table id='serverInfo'>"	
+	serverTable = serverTable & "<tr><th colspan='2' style='text-align:center;background-color:mediumseagreen;padding:2px;'>Server Variables ("& Request.ServerVariables.Count  &")</th></tr>"	
+	For Each serverVar in Request.ServerVariables
+		If IsArray(Request.ServerVariables(serverVar)) Then
+			For serverVarItem = LBound(Request.ServerVariables(serverVar)) to UBound(Request.ServerVariables(serverVar))
+				serverTable = serverTable & "<tr>"
+				serverTable = serverTable & "<th>" & serverVar & " " & serverVarItem & "</th>"
+				serverTable = serverTable & "<td>" & Request.ServerVariables(item)(serverVarItem) & "</td>"
+				serverTable = serverTable & "</tr>"
+			Next
+  		Else
+			serverTable = serverTable & "<tr>"
+			serverTable = serverTable & "<th>" & serverVar & "</th>"
+			serverTable = serverTable & "<td>" & Request.ServerVariables(serverVar) & "</td>"
+			serverTable = serverTable & "</tr>"
+  		End If
+	Next
+	serverTable = serverTable & "</table>"
+
+	' Compile Error Information
+	dim errorDump
+	errorDump = errMsg & debugInfo & sessionTable & appVarTable & serverTable
 
 	'Send Email
 	dim tech : tech = CreateObject("WScript.Network").UserName = "ITGuy"
 	If NOT tech Then
 		Dim oMessage : Set oMessage = CreateObject("CDO.Message") 
 		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/sendusing") 	 = 2
-		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver") 	 = "smtp.server.com"
+		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver") 	 = "smtp.webapp.com"
 		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
 		oMessage.Configuration.Fields.Update
 
-		oMessage.To = "ITGuy@server.com"
-		oMessage.From = "WebApp@server.com"
-		oMessage.Subject="WebApp Error - " & objASPError.Category
-		oMessage.htmlBody = style & errMsg & debugInfo & sessionTable & appVarTable
-		oMessage.Send
+		oMessage.To = "it@webapp.com"
+		oMessage.From = "WebApp@webapp.com"
+		oMessage.Subject = "Error - " & objASPError.Category
+		oMessage.htmlBody = style & errorDump		
+		oMessage.Send		
 	End If
 %>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>System Error</title>
+		<title>WebApp Error</title>
 		<% If tech Then Response.Write style%>
 	</head>
 	<body>
-		Sorry! The system encountered an error. An email has been sent to IT. If you have any concerns or questions please send an email to <a href="mailto:ITGuy@server.com">ITGuy@server.com</a> or call x555.
-		<%If tech Then Response.Write errMsg & debugInfo & sessionTable & appVarTable %>
+		Sorry! The system encountered an error. An email has been sent to IT. If you have any concerns or questions please send an email to <a href="mailto:help@webapp.com">help@webapp.com</a> or call x555.
+		<%If tech Then Response.Write errorDump %>
 	</body>
 </html>
