@@ -69,7 +69,7 @@
 	debugInfo = debugInfo & "<tr> <th colspan='2' style='text-align:center;background-color:gold;padding:2px;'>Debug Information</th> </tr>"	
 	debugInfo = debugInfo & "<tr> <th>User</th>		<td>"& Request.serverVariables("AUTH_USER") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Time</th>		<td>"& Now() &"</td> </tr>"		
-	debugInfo = debugInfo & "<tr> <th>Page</th>		<td>"& Request.ServerVariables("SCRIPT_NAME") &"</td> </tr>"	
+	debugInfo = debugInfo & "<tr> <th>Page</th>		<td>"& Request.ServerVariables("SCRIPT_NAME") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>User IP</th>	<td>"& Request.ServerVariables("REMOTE_HOST") & " (" & Request.ServerVariables("REMOTE_ADDR") &")</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Browser</th>	<td>"& Request.ServerVariables("HTTP_USER_AGENT") &"</td> </tr>"
 	debugInfo = debugInfo & "<tr> <th>Server</th>	<td>"& Request.ServerVariables("SERVER_NAME") & " (" & Request.ServerVariables("LOCAL_ADDR") &")</td> </tr>"
@@ -98,25 +98,27 @@
 	If NOT tech Then
 		Dim oMessage : Set oMessage = CreateObject("CDO.Message") 
 		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/sendusing") 	 = 2
-		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver") 	 = "smtp.webapp.com"
+		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver") 	 = "smtp.site.com"
 		oMessage.Configuration.Fields.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
 		oMessage.Configuration.Fields.Update
 
-		oMessage.To = "ITGuy@webapp.com"
-		oMessage.From = "webapp@webapp.com"
-		oMessage.Subject = "WebApp Error - " & objASPError.Category
+		oMessage.To = "ITGuy@site.com"
+		oMessage.From = "webapp@site.com"
+		oMessage.Subject = "Error - " & objASPError.Category
 		oMessage.htmlBody = style & errorDump		
-		oMessage.Send		
+		oMessage.Send
 	End If
 %>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>WebApp Error</title>
+		<title><%=Application("Name")%> Error</title>
 		<% If tech Then Response.Write style%>
 	</head>
 	<body>
-		Sorry! The system encountered an error. An email has been sent to IT. If you have any concerns or questions please send an email to <a href="mailto:help@webapp.com">help@webapp.com</a> or call x5555
-		<%If tech Then Response.Write errorDump %>
+		Sorry! The system encountered an error. An email has been sent to IT. If you have any concerns or questions please send an email to <a href="mailto:help@site.com">help@site.com</a> or call x5555.
+		<div style="<% If NOT tech Then Response.Write "display:none;" %>">
+			<%=errorDump%>
+		</div>		
 	</body>
 </html>
